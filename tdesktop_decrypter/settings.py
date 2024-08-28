@@ -174,7 +174,7 @@ def read_settings_block(verison, data: BytesIO, block_id: SettingsBlocks):
     if block_id == SettingsBlocks.dbiMtpAuthorization:
         return read_qt_byte_array(data)
 
-    raise Exception(f'Unnown block ID while reading settings: {block_id}')
+    raise Exception(f'Unknown block ID while reading settings: {block_id}')
 
 
 def read_settings_blocks(version, data: BytesIO):
