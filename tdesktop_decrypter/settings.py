@@ -199,8 +199,12 @@ def read_settings_blocks(version, data: BytesIO):
                     continue
 
                 blocks[block_id] = block_data
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.error(
+                    "Error while reading settings block!",
+                    exc_info=exc,
+                )
+                continue
     except StopIteration:
         pass
     
