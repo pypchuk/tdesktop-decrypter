@@ -191,13 +191,16 @@ def read_settings_blocks(version, data: BytesIO):
 
     try:
         while True:
-            block_id = SettingsBlocks(read_qt_int32(data))
             try:
-                block_data = read_settings_block(version, data, block_id)
-            except UnhandledSettingsBlock:
-                continue
+                block_id = SettingsBlocks(read_qt_int32(data))
+                try:
+                    block_data = read_settings_block(version, data, block_id)
+                except UnhandledSettingsBlock:
+                    continue
 
-            blocks[block_id] = block_data
+                blocks[block_id] = block_data
+            except Exception:
+                pass
     except StopIteration:
         pass
     
