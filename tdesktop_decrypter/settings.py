@@ -1,3 +1,4 @@
+import logging
 from io import BytesIO
 from enum import Enum
 
@@ -9,6 +10,8 @@ from tdesktop_decrypter.qt import (
     read_qt_byte_array,
     read_qt_utf8
 )
+
+logger = logging.getLogger(__name__)
 
 
 class SettingsBlocks(Enum):
@@ -112,6 +115,10 @@ def read_boolean(data: BytesIO) -> bool:
     return read_qt_int32(data) == 1
 
 
+class UnhandledSettingsBlock(Exception):
+    pass
+
+
 def read_settings_block(verison, data: BytesIO, block_id: SettingsBlocks):
     if block_id == SettingsBlocks.dbiAutoStart:
         return read_boolean(data)
@@ -174,7 +181,9 @@ def read_settings_block(verison, data: BytesIO, block_id: SettingsBlocks):
     if block_id == SettingsBlocks.dbiMtpAuthorization:
         return read_qt_byte_array(data)
 
-    raise Exception(f'Unknown block ID while reading settings: {block_id}')
+    logger.info(f"Unhandled block {block_id}")
+
+    raise UnhandledSettingsBlock(f'Unknown block ID while reading settings: {block_id}')
 
 
 def read_settings_blocks(version, data: BytesIO):
@@ -183,7 +192,11 @@ def read_settings_blocks(version, data: BytesIO):
     try:
         while True:
             block_id = SettingsBlocks(read_qt_int32(data))
-            block_data = read_settings_block(version, data, block_id)
+            try:
+                block_data = read_settings_block(version, data, block_id)
+            except UnhandledSettingsBlock:
+                continue
+
             blocks[block_id] = block_data
     except StopIteration:
         pass
